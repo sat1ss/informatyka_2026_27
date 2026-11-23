@@ -1,5 +1,5 @@
-#include <iostream>
 #pragma once
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>

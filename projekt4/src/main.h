@@ -1,9 +1,6 @@
 #pragma once
-#include <iostream>
+#include <cmath>
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
 
 class Paletka {
     float x, y;
@@ -11,36 +8,36 @@ class Paletka {
     sf::RectangleShape shape;
 
     public:
-        Paletka(float sX = 0, float sY = 0, float sSze = 50, float sWys = 10, float sPred = 0){
-            shape.setSize({sSze, sWys});
-            shape.setOrigin({sSze/2, sWys/2});
+        Paletka(float sX = 0, float sY = 0, float sSze = 50, float sWys = 10, float sPred = 0)
+        : x(sX), y(sY), szerokosc(sSze), wysokosc(sWys), predkosc(sPred){
+            shape.setSize({szerokosc, wysokosc});
+            shape.setOrigin({szerokosc/2, wysokosc/2});
             shape.setPosition({x, y});
             shape.setFillColor(sf::Color::Red);
-        };
-
-
+        }
 
         void moveLeft(){
-            shape.setPosition({x - predkosc, y});
+            shape.setPosition({x -= predkosc, y});
         }
         void moveRight(){
-            shape.setPosition({x + predkosc, y});
+            shape.setPosition({x += predkosc, y});
         }
         void clampToBounds(float width){
-            if(x-szerokosc/2 >=.0) {
-                shape.setPosition({szerokosc/2, y});
-            } else if (x-szerokosc/2 >=.0) {
-                shape.setPosition({width - szerokosc/2, y});
+            if(x-szerokosc/2 <=.0) {
+                x = szerokosc / 2;
+            } else if (x+szerokosc/2 >= width) {
+                x = width - szerokosc/2;
             }
+            shape.setPosition({x, y});
         }
         void draw(sf::RenderTarget& target){
             target.draw(shape);
         }
 
-        float getX() {return x;}
-        float getY() {return y;}
-        float getSzerokosc() {return szerokosc;}
-        float getWysokosc() {return wysokosc;}
+        float getX() const {return x;}
+        float getY() const {return y;}
+        float getSzerokosc() const {return szerokosc;}
+        float getWysokosc() const {return wysokosc;}
 };
 
 
@@ -51,13 +48,13 @@ class Pilka {
     sf::CircleShape shape;
 
     public:
-        Pilka(float sX = 0, float sY = 0, float sVx = 0, float sVy = 0, float sRad = 0){
-            shape.setRadius(sRad);
-            shape.setOrigin({sRad, sRad});
-            shape.setPosition({sX, sY});
+        Pilka(float sX = 0, float sY = 0, float sVx = 0, float sVy = 0, float sRad = 0)
+        : x(sX), y(sY), vx(sVx), vy(sVy), radius(sRad) {
+            shape.setRadius(radius);
+            shape.setOrigin({radius, radius});
+            shape.setPosition({x, y});
             shape.setFillColor(sf::Color::White);
-        };
-
+        }
 
 
         void move() {
@@ -81,8 +78,23 @@ class Pilka {
         }
 
         bool collidePaddle(const Paletka& p){
-            if(Paletka.shape - ){
+            float pilkaLewa = x - radius;
+            float pilkaPrawa = x + radius;
+            float pilkaGora = y - radius;
+            float pilkaDol = y + radius;
+
+            float paletkaLewa = p.getX() - p.getSzerokosc()/2;
+            float paletkaPrawa = p.getX() + p.getSzerokosc()/2;
+            float paletkaGora = p.getY() - p.getWysokosc()/2;
+            float paletkaDol =  p.getY() + p.getWysokosc()/2;
+
+
+            bool nakladaSie = pilkaPrawa >= paletkaLewa && pilkaLewa <= paletkaPrawa && pilkaDol >= paletkaGora && pilkaGora <= paletkaDol;
+
+            if(nakladaSie && vy > 0){
                 vy = -std::abs(vy);
+                y = paletkaGora - radius;
+                shape.setPosition({x, y});
                 return true;
             }
             return false;
@@ -92,10 +104,10 @@ class Pilka {
             target.draw(shape);
         }
 
-        float getX() {return x;}
-        float getY() {return y;}
-        float getVx() {return vx;}
-        float getVy() {return vy;}
-        float getRadius() {return radius;}
+        float getX() const {return x;}
+        float getY() const {return y;}
+        float getVx() const {return vx;}
+        float getVy() const {return vy;}
+        float getRadius() const {return radius;}
 
 };
